@@ -2,10 +2,12 @@ const pool = require("../db/pool");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const bcrypt = require('bcryptjs');
+const { uploadFiles } = require("../services/imageKit");
 
 exports.registerController = async (req, res) => {
   try {
-    const { username, password, avatar_url } = req.body;
+    const { username, password} = req.body;
+    const file = req.file
 
     const { rows } = await pool.query(
       "SELECT * FROM users WHERE username = $1",
@@ -20,6 +22,10 @@ exports.registerController = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password,10)
    
+    const result = await uploadFiles(file.buffer.toString('base64'));
+
+    const avatar_url = result.url;
+
     const insertUser = await pool.query(
       "INSERT INTO users (username, password, avatar_url) VALUES ($1, $2, $3) RETURNING *",
       [username,hashedPassword, avatar_url]

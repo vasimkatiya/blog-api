@@ -19,7 +19,7 @@ app.use(cookieParser());
 
 app.use("/",indexRouter);
 app.use("/auth",authRouter);
-app.use("/post",postRouter)
+app.use("/post",postRouter);
 
 app.listen(port,()=>{
     console.log(`server is running on port : ${port}`);
