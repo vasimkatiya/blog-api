@@ -50,3 +50,28 @@ exports.createPostController = async (req, res) => {
     });
 
 }
+
+
+exports.showPostController = async (req,res)=>{
+    try{
+
+        const posts = await pool.query("SELECT * from posts;");
+
+        if(posts.rows.length == 0){
+            return res.status(404).json({
+                msg:"post not found or not fetched !",
+            })
+        }
+
+        res.status(200).json({
+            msg:'post fetched successfully',
+            posts:posts.rows,
+        })
+
+    }catch(err){
+        console.log(err);
+        res.status(500).json({
+            msg:'internal server error',
+        })
+    }
+}
