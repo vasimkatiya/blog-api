@@ -75,3 +75,78 @@ exports.showPostController = async (req,res)=>{
         })
     }
 }
+
+exports.singlePostController = async(req,res)=>{
+    const {id} = req.params;
+    
+    const post = await pool.query('select * from posts where id = $1;',[id]);
+
+    
+    res.status(200).json({
+        msg:'post fetched',
+        post:post.rows[0],
+    })
+
+}
+
+
+exports.profilesPostsController = async (req,res)=>{
+    //searched users profiles
+    const {userId} = req.params;
+
+    const posts = await pool.query('select * from posts where user_id = $1;',[userId]);
+
+    res.status(200).json({
+        msg:'profile post fetched',
+        posts:posts.rows,
+    });
+
+}
+
+
+exports.OwnProfilePost = async(req,res)=>{
+    const userId = req.user.id;
+    const posts = await pool.query('select * from posts where user_id = $1;',[userId]);
+
+
+    res.status(200).json({
+        msg:'profile post fetched',
+        posts:posts.rows,
+    });
+
+}
+
+exports.deletePostController = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+
+        if (!id) {
+            return res.status(400).json({
+                msg: "Post ID is required",
+            });
+        }
+
+        const deletedPost = await pool.query(
+            "DELETE FROM posts WHERE id = $1 AND user_id = $2 RETURNING *;",
+            [id, userId]
+        );
+
+        if (deletedPost.rows.length === 0) {
+            return res.status(403).json({
+                msg: "Post not found or you are not authorized to delete it",
+            });
+        }
+
+        res.status(200).json({
+            msg: "Post deleted successfully!",
+            deletedPost: deletedPost.rows[0],
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            msg: "Internal server error",
+        });
+    }
+};

@@ -67,9 +67,9 @@ exports.loginController = async (req,res)=>{
 
     const {rows} = await pool.query('select * from users where username = $1;',[username]);
 
-    if(rows.length < 0)
+    if(rows.length == 0)
     {
-        res.status(401).json({
+        return res.status(401).json({
             msg:"user not found !"
         });
     };
@@ -77,7 +77,7 @@ exports.loginController = async (req,res)=>{
     const validPassword = await bcrypt.compare(password,rows[0].password);
 
     if(!validPassword){
-        res.status(401).json({
+        return res.status(401).json({
             msg:"invalid password"
         })
     }
